@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;  
+            align-items: center;      
+            background: linear-gradient(45deg, #1E90FF, #00BFFF, #4682B4, #5F9EA0); 
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            font-family: Arial, sans-serif;
+            overflow: hidden; 
+            position: relative; 
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            background-color: rgba(0, 0, 0, 0.5);
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        p {
+            font-size: 1.5em;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #00BFFF;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1E90FF;
+            transform: scale(1.1);
+        }
+
+
+        
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Welcome to Moody!</h1>
+        <p>
+            The app that find the best match between your vibes and music.
+        </p>
+        <form action="{{ url_for('option') }}">
+            <button type="submit">Spot the mood</button>
+        </form>
+    </div>
+
+
+</body>
+</html>

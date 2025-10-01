@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu</title>
+    <style>
+
+        /* Background */
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(45deg, #1E90FF, #00BFFF, #4682B4, #5F9EA0);
+            animation: gradientAnimation 15s ease infinite; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;     
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Background animation */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        p {
+            font-size: 1.3em;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .button-container button {
+            width: 200px;
+            height: 50px;
+            margin: 10px;
+            font-size: 1.2rem;
+            border: 2px solid #ccc;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 25px;
+        }
+
+        .button-container button:hover {
+            background-color: #4682B4;
+            color: white;
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgb(161, 12, 12);
+            color: white;
+            font-family: Arial, sans-serif;
+            text-decoration: none !important;
+            padding: 8px 15px;
+            font-size: 1rem;
+            border: 2px solid rgb(161, 12, 12);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .home-button:hover {
+            background-color: rgb(189, 14, 14);
+        }
+
+
+        #start-button {
+            width: 200px;
+            height: 50px;
+            margin: 10px;
+            font-size: 1.2rem;
+            border: 2px solid #ccc;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 25px;
+        }
+
+        #start-button:hover {
+            background-color: #4682B4;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title -->
+    <div class="content">
+        <h1>Menu</h1>
+
+        <p>
+            If you are new to Moody, please enrol and connect your Spotify account to proceed.
+            <br> After the registration, choose your listening mode.
+        </p>
+    </div>
+
+    <div class="button-container">
+        <!-- Enroll button -->
+        <form action="{{ url_for('enroll') }}">
+            <button id="button-a" type="submit">Enrollment</button>
+        </form>
+
+        <!-- Spotify login button -->
+        <form action="{{ url_for('spotify') }}">
+            <button id = "button-c" type="submit">Spotify Login</button>
+        </form>
+
+        <!-- Modality button -->
+        <form action="{{ url_for('modality') }}">
+            <button id = "start-button" type="submit" {% if start_disabled %}disabled{% endif %}>Mode</button>
+        </form>
+    </div>
+
+    <!-- Back to home button --> 
+
+    <form action="{{ url_for('back_to_home') }}">
+        <button class="home-button" type="submit">EXIT</button>
+    </form>
+
+
+</body>
+</html>

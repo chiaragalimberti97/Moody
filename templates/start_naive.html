@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Recognition and Playlist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #121212;
+        }
+
+        .title {
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            padding: 40px;
+            text-align: center;
+        }
+
+        h3 {
+            font-size: 3em; 
+            font-weight: bold; 
+            color: #FFFFFF; 
+            text-transform: uppercase; 
+            letter-spacing: 5px; 
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.6); 
+            margin: 0;
+            padding: 10px;
+            white-space: nowrap;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+        }
+
+        .content {
+            color: #1E1E1E;
+            display: flex;
+            justify-content: center;
+            align-items: stretch; /* Ensure containers stretch vertically to the same height */
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            padding-top: 40px; 
+        }
+
+        .video-container, .result_spotify {
+            flex: 1; /* Ensure containers take equal width */
+            height: 100%; /* Ensure containers stretch to the same height */
+            max-width: 600px;
+            text-align: center;
+            background-color: #1E1E1E; 
+            border-radius: 8px; 
+        }
+
+        .video-container h2, .result_spotify h2 {
+            font-size: 1.8em;
+            color: #FFFFFF;
+            margin-bottom: 15px;
+        }
+
+        .box_div {
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            padding: 5px;
+            background-color: #1E1E1E;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .box_div iframe {
+            border: none;
+            width: 100%; 
+            height: 500px; 
+        }
+
+        .btn-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .btn-container-flex {
+            display: flex;
+            justify-content: center;
+            gap: 20px; /* Space between buttons */
+            margin-bottom: 20px; /* Space below these buttons */
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #121212;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            filter: brightness(1.1); /* Slightly lighten on hover */
+            transform: scale(1.05);
+        }
+
+        .btn-back-to-menu {
+            background-color: #40ba3e;
+            font-weight: bold;
+        } 
+
+        .btn-back-to-mode {
+            background-color:  #40ba3e;
+            font-weight: bold; 
+        }
+
+        .btn-personalization {
+            background-color:  #40ba3e;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgb(161, 12, 12);
+            color: white;
+            font-family: Arial, sans-serif;
+            text-decoration: none;
+            padding: 8px 15px;
+            font-size: 1rem;
+            border: 2px solid  rgb(161, 12, 12);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .home-button:hover {
+            background-color: rgb(189, 14, 14);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Title -->
+    <div class="title">
+        <h3>Feel it. Hear it. Moody.</h3>
+    </div>
+
+    <div class="content">
+        
+        <!-- Box video -->
+        <div class="video-container">
+            <h2>Live Video Stream</h2>
+            <img src="{{ video_url }}" alt="Video Stream" style="width: 100%; height: auto;">
+        </div>
+
+        <!-- Box Playlist -->
+        <div id="playlist-container" class="result_spotify">
+            <h2>The playlist will be shown here after the emotion gets recognized.</h2>
+        </div>
+    </div>
+
+    <script>
+        let emotionRecognized = false;          // Track if emotion get recognized
+        let detectedEmotion = "{{ main_emo }}"; // Memorized the recognized emotion
+
+        // Function to load the relative playlist when the emotion get recognized
+        function loadPlaylist() {
+            if (emotionRecognized) {
+                $.get('/get_playlist_naive', function(data) {
+                    if (data.playlist_url) {
+
+                        // Update the playlist based on the mood changes
+                        $('#playlist-container').html('<h2>Mood: ' + data.main_emo + ' </h2><iframe src="' + data.playlist_url + '" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>');
+                    }
+                });
+            }
+        }
+
+        // Check if the emotion was recognized
+        if (detectedEmotion) {
+            emotionRecognized = true;
+            loadPlaylist();  
+        }
+
+        // Check the new emotion every 30 seconds and eventually update the playlist
+        setInterval(function() {
+            if (emotionRecognized) {
+                loadPlaylist();
+            }
+        }, 10000); // 30 seconds
+    </script>
+    
+    <!-- Buttons Container -->
+    <div class="btn-container-flex">
+        <!-- Back to menu button -->
+        <div class="btn-container">
+            <a href="{{ url_for('back_to_option') }}" class="btn btn-back-to-menu">MENU</a>
+        </div>
+
+        <!-- Back to mode button -->  
+        <div class="btn-container">
+            <a href="{{ url_for('back_to_mode') }}" class="btn btn-back-to-mode">MODE</a>
+        </div>
+    </div>
+
+    <!-- Personalization button centered below -->
+    <div class="btn-container">
+        <a href="{{ url_for('personalization_naive') }}" class="btn btn-personalization">PERSONALIZATION</a>
+    </div>
+
+    <!-- Back to home button -->  
+    <form action="{{ url_for('back_to_home') }}">
+        <button class="home-button" type="submit">EXIT</button>
+    </form>
+
+</body>
+</html>

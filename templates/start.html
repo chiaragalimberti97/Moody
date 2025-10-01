@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Recognition and Playlist</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #121212;
+            font-family: Arial, sans-serif;
+        }
+
+        .title {
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            padding: 40px;
+            text-align: center;
+        }
+
+        h3 {
+            font-size: 3em; 
+            font-weight: bold; 
+            color: #FFFFFF; 
+            text-transform: uppercase; 
+            letter-spacing: 5px; 
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.6); 
+            margin: 0;
+            padding: 10px;
+            white-space: nowrap;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            color: #F0F0F0;
+            margin-bottom: 20px;
+        }
+
+        .content {
+            color: #1E1E1E;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .video-container, .result_spotify ,  .images-container, .playlist-container{
+            width: 48%;
+            max-width: 600px;
+            height: auto;
+            text-align: center;
+            align-items: center;
+            display: flex;
+            flex-direction: column;           
+            justify-content: center;
+            background-color: #1E1E1E; 
+            border-radius: 8px; 
+        }
+
+        .video-container h2, .result_spotify, .images-container h2 ,  .playlist-container {
+            font-size: 1.8em;
+            color: #F0F0F0;
+            margin-bottom: 15px;
+
+        }
+
+        #images-container img {
+            width: 250px;                    
+            height: auto;                     
+            margin-top: 10px;                 
+        }
+
+        #playlist-container, #emotion-container ,#images_container{
+            margin-top: 20px;
+            text-align: center;
+            background-color: #1E1E1E;
+            color: #F0F0F0;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .box_div {
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            padding: 5px;
+            background-color: #9c2828;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .btn-container-flex {
+            display: flex;
+            justify-content: center;
+            gap: 20px; /* Space between buttons */
+            margin-bottom: 20px; /* Space below these buttons */
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #121212;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            filter: brightness(1.1); /* Slightly lighten on hover */
+            transform: scale(1.05);
+        }
+
+        .btn-back-to-menu {
+            background-color: #40ba3e;
+            font-weight: bold;
+        } 
+
+        .btn-back-to-mode {
+            background-color:  #40ba3e;
+            font-weight: bold; 
+        }
+
+        .btn-personalization {
+            background-color:  #40ba3e;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgb(161, 12, 12);
+            color: white;
+            font-family: Arial, sans-serif;
+            text-decoration: none;
+            padding: 8px 15px;
+            font-size: 1rem;
+            border: 2px solid rgb(161, 12, 12);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .home-button:hover {
+            background-color: rgb(189, 14, 14);
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Title -->
+    <div class="title">
+        <h3>Feel it. Hear it. Moody.</h3>
+    </div>
+
+    <div class="content">
+        
+        <!-- Box video -->
+        <div class="video-container">
+            
+            <h2>Live Video Stream</h2>
+                <img src="{{ video_url }}" alt="Video Stream" style="width: 100%; height: auto;">
+            
+        </div>
+
+        
+
+        <!-- Box immagine -->
+        <div id="images-container">
+            <p></p>
+        </div>
+
+       
+    </div>
+     <!-- Box emotion -->
+     <div id="emotion-container">
+        <p></p>
+    </div>
+
+    <script>
+        let emotionRecognized = false;          // Track if emotion get recognized
+        let detectedEmotion = "{{ main_emo }}"; // Memorized the recognized emotion
+        let spotifyPlayer;
+        let accessToken;
+	
+
+        // Initialization of Spotify SDK
+        window.onSpotifyWebPlaybackSDKReady = async () => {
+            // Backend token
+            const response = await fetch('/get_spotify_token');
+            const data = await response.json();
+            accessToken = data.token;
+
+            // Spotify inizialization
+            spotifyPlayer = new Spotify.Player({
+                name: 'Web Playback SDK',
+                getOAuthToken: cb => { cb(accessToken); },
+                volume: 0.8
+            });
+
+            spotifyPlayer.addListener('ready', ({ device_id }) => {
+                console.log('Spotify Player Ready with Device ID:', device_id);
+                //Link to Spotify API
+                fetch('https://api.spotify.com/v1/me/player', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ device_ids: [device_id], play: false })
+                });
+            });
+
+            spotifyPlayer.addListener('not_ready', ({ device_id }) => {
+                console.log('Device ID has gone offline', device_id);
+            });
+
+            spotifyPlayer.connect();
+        };
+
+        // Function to get the current track
+        function getCurrentTrack() {
+            fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // data && data.item
+                if (data && data.item) {
+		            const albumImages = data.item.album.images; 
+            	    const albumImage = albumImages[0]?.url;
+                    const trackName = data.item.name;
+                    const artistName = data.item.artists.map(artist => artist.name).join(', ');
+                    // Show the name and the title of the song that is playing
+                    $('#images-container').html(` <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;background-color: #1E1E1E;padding: 20px; border-radius: 10px;">
+                             <h1>Now Playing: ${trackName} by ${artistName}</h1>
+                             <img src="${albumImage}" alt="Album Cover" style="width: 300px; height: 300px; display: block; margin-bottom: 10px;">    </div>
+                    `);
+
+                } else {
+                    $('#images-container').html('<h1>No track is currently playing.</h1>');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching current track:', error);
+                $('#images-container').html('<h1>Please wait for your emotion to be processed.</h1>');
+            });
+        }
+
+        
+        // Function to load the playlist once the main emotion gets recognized
+        function loadPlaylist() {
+            if (emotionRecognized) {
+
+                // Link to get the playlists
+                $.get('/get_playlist', function(data) {
+
+                    // Verifiy that `data` e `data.playlist_url` are correct
+                    if (data && data.playlist_url) {
+                        if (data.playlist_url.startsWith('spotify:track:')) {
+    
+                            // Play of a single song
+                            fetch('https://api.spotify.com/v1/me/player/play', {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `Bearer ${accessToken}`,
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    uris: [data.playlist_url]
+                                })
+                            })
+                                .then(response => {
+                                    $('#emotion-container').html('<h2>  Mood: ' + data.main_emo +'<h2>  ');
+                                    getCurrentTrack();
+                                    if (response.ok) {
+                                        console.log('Track is playing successfully.');
+                                        getCurrentTrack();
+                                    } else {
+                                        console.error('Error playing track:', response);
+                                        $('#images-container').html('<h1>Error: Unable to play track</h1>');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Fetch error while playing track:', error);
+                                    $('#images-container').html('<h1>Error: Network issue</h1>');
+                                });
+                        } else {
+                            console.error('Unsupported URL format (not a track):', data.playlist_url);
+                            $('#images-container').html('<h1>Error: Unsupported URL format</h1>');
+                        }
+                    } else {
+                        console.error('Invalid data received from server:', data);
+                        $('#images-container').html('<h1>Error: No valid track data</h1>');
+                    }
+                }).fail(function(xhr, status, error) {
+                    console.error('Failed to fetch track:', status, error);
+                    $('#images-container').html('<h1>Please  your emotion to be processed.</h1>');
+                });
+            }
+        }
+
+
+        // Check if the emotion gets recognized
+        if (detectedEmotion) {
+            emotionRecognized = true;
+            //loadPlaylist(); 
+        }
+
+        // Update the playlist every 30 seconds
+        setInterval(function() {
+            if (emotionRecognized) {
+                loadPlaylist();
+            }
+        }, 30000); 
+    </script>
+
+    <!-- Buttons Container -->
+    <div class="btn-container-flex">
+        <!-- Back to menu button -->
+        <div class="btn-container">
+            <a href="{{ url_for('back_to_option') }}" class="btn btn-back-to-menu">MENU</a>
+        </div>
+
+        <!-- Back to mode button -->  
+        <div class="btn-container">
+            <a href="{{ url_for('back_to_mode') }}" class="btn btn-back-to-mode">MODE</a>
+        </div>
+    </div>
+
+    <!-- Personalization button centered below -->
+    <div class="btn-container">
+        <a href="{{ url_for('personalization_naive') }}" class="btn btn-personalization">PERSONALIZATION</a>
+    </div>
+
+    <!-- Back to home button -->  
+    <form action="{{ url_for('back_to_home') }}">
+        <button class="home-button" type="submit">EXIT</button>
+    </form>
+
+    
+
+</body>
+</html>
