@@ -27,7 +27,7 @@ And finally call the function main.py:
 
 
 The results :
-![Enrollment](README_images\image1.png)
-![Website structure](README_images\image2.png)
-![Spotify player](README_images\image3.png)
+![Enrollment](README_images/image1.png)
+![Website structure](README_images/image2.png)
+![Spotify player](README_images/image3.png)
 
